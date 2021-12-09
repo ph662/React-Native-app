@@ -1,0 +1,7 @@
+export const MOEDA_REAL = "R$";
+
+export const API_INVESTIMENTOS = "https://run.mocky.io/v3/7b2dfe42-37a3-4094-b7ce-8ee4f8012f30";
+
+export const INVESTIMENTOS_STRING = "INVESTIMENTOS";
+export const DADOS_DO_INVESTIMENTO_STRING = "DADOS DO INVESTIMENTO";
+export const RESGATE_DO_SEU_JEITO_STRING = "RESGATE DO SEU JEITO";
