@@ -1,1 +1,1 @@
-Coopersystem challenge, react native app0
+Coopersystem challenge, react native app
