@@ -18,23 +18,22 @@ const HomePage = () => {
             .then(data => setData(data))
     }, []);
 
-    renderItem = ({ item }) => {
-        return (
-            <View>
-                <Card item={item} onPress={() => navigation.navigate('DadosInvestimentos', { item })} />
-            </View>
-        );
-    };
 
-    const Card = ({ item, onPress }) => (
-        <TouchableOpacity style={styles.item} onPress={onPress}>
-            <View style={{ flexDirection: 'row' }}>
-                <Text style={styles.nome}>{item.nome}</Text>
-                <Text style={styles.saldo}>{utils.formatarMoedaReal(item.saldoTotal)}</Text>
-            </View>
-            <Text style={styles.objetivo}>{item.objetivo}</Text>
-        </TouchableOpacity>
-    );
+    const Card = ({ item, onPress }) => {
+
+        let indicadorCarencia = item.indicadorCarencia.toUpperCase() === "S";
+
+        return (
+            <TouchableOpacity style={styles.item} disabled={indicadorCarencia} onPress={onPress}>
+                <View style={{ flexDirection: 'row' }}>
+                    <Text style={styles.nome}>{item.nome}</Text>
+                    <Text style={styles.saldo}>{utils.formatarMoedaReal(item.saldoTotal)}</Text>
+                </View>
+                <Text style={styles.objetivo}>{item.objetivo}</Text>
+            </TouchableOpacity>
+
+        );
+    }
 
     const fazerRequest = async () => {
         return await new InvestimentoService().getInvestimentoRequest();
@@ -60,6 +59,12 @@ const HomePage = () => {
             padding: 7,
             elevation: 5
         },
+        square: {
+            position: 'absolute',
+            width: '100%',
+            height: 3,
+            backgroundColor: "yellow"
+        },
         saldo: {
             fontSize: 20,
             maxHeight: 400,
@@ -79,8 +84,17 @@ const HomePage = () => {
         }
     });
 
+    renderItem = ({ item }) => {
+        return (
+            <View>
+                <Card item={item} onPress={() => navigation.navigate('DadosInvestimentos', { item })} />
+            </View>
+        );
+    };
+
     return (
         <View>
+            <View style={styles.square} />
             <Cabecalho item={INVESTIMENTOS_STRING}> </Cabecalho>
             <FlatList data={data} renderItem={this.renderItem} />
         </View>

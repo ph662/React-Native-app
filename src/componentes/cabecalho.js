@@ -10,6 +10,8 @@ const Cabecalho = (props) => {
             alignItems: 'center',
             justifyContent: 'center',
             padding: 8,
+            marginTop: 10,
+            marginBottom: 10,
         }
     });
 

@@ -11,7 +11,6 @@ export default class InvestimentoService {
             } catch (error) {
                 reject(new Error('Ocorreu um erro ao recuperar a lista de investimentos'))
             }
-        }
-        )
+        })
     }
 }
