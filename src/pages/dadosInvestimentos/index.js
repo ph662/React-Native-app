@@ -11,6 +11,7 @@ import {
     NOME_STRING,
     SALDO_TOTAL_DISPONIVEL_STRING,
     VALOR_RESGATAR,
+    ERRO_VALOR_MAIOR
 } from '../../utils/constantes';
 import Utils from '../../utils/utils';
 import Big from 'big.js';
@@ -20,6 +21,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 const DadosInvestimentosPage = (props) => {
 
     const [valores, setValores] = useState([]);
+    const [erro, setErro] = useState([]);
     const [loading, setLoading] = useState(false);
 
     const styles = StyleSheet.create({
@@ -53,16 +55,40 @@ const DadosInvestimentosPage = (props) => {
 
 
 
-    const handleInput = (value, index) => {
+    const handleInput = (value, index, acaoValorFormatado) => {
         setLoading(true)
         const verifyIndex = valores.filter((item) => item.index === index);
 
         if (verifyIndex.length > 0) {
+
             const verifyDiffIndex = valores.filter((item) => item.index !== index);
             const obj = [
                 ...verifyDiffIndex,
                 { value, index }
             ]
+
+            const verifyIndexErro = obj.filter((item) => item.index === index);
+            if (verifyIndexErro[0].value > acaoValorFormatado) {
+                const verifyDiffIndex = erro.filter((item) => item !== index);
+                const erros = [
+                    ...verifyDiffIndex,
+                    {value: index}
+                ]
+
+                console.log("increment")
+                setErro(erros);
+                return;
+            }
+
+
+            if (erro.filter((item) => item.value === index).length > 0) {
+                const a = erro.filter((item) => item.value !== index);
+                console.log("decremetn")
+                setErro(a);
+            }
+
+
+            
             setValores(obj);
         } else if (valores.length > 0) {
             const obj = [
@@ -88,16 +114,16 @@ const DadosInvestimentosPage = (props) => {
 
         let actions = [];
         data.acoes.map((item, index) => {
-            const getItem = valores.find((item) => item.index === index);
-            const verifyValue = getItem ? getItem.value : '0.0'
 
             const obj = {
+                acaoValorFormatado: retornarAcaoValorFormatado(item),
                 id: item.id,
                 index: index,
                 nome: item.nome,
                 percentual: item.percentual,
                 onPress: handleInput,
-                accessibilityLabel: 'Informe valor de resgate'
+                accessibilityLabel: 'Informe valor de resgate',
+                erro: false,
             }
             actions.push(obj);
         })
@@ -105,16 +131,27 @@ const DadosInvestimentosPage = (props) => {
         return actions;
     }
 
+    const retornarAcaoValorFormatado = (item) => {
+        let bigSaldoTotal = new Big(data.saldoTotal);
+        let bigPercentual = new Big(item.percentual);
+        let bigAcaoValor = new Big(bigSaldoTotal.times(bigPercentual.div(100))).toFixed(2);
+        return (Number(bigAcaoValor));
+    }
+
     const renderItem = ({ item }) => {
-        function retornarAcaoValorFormatado() {
-            //Calculo com precisao BigDecimal
-            let bigSaldoTotal = new Big(data.saldoTotal);
-            let bigPercentual = new Big(item.percentual);
-            let bigAcaoValor = new Big(bigSaldoTotal.times(bigPercentual.div(100))).toFixed(2);
-            return utils.formatarMoedaRealComCifrao(Number(bigAcaoValor));
-        }
+
+        let erroValorMaior = <View style={{ flexDirection: 'row' }}>
+            <Text style={{ fontSize: 13, textAlign: 'left', flex: 1, color: 'red' }}> {ERRO_VALOR_MAIOR + item.acaoValorFormatado} </Text>
+        </View>
+
         let acaoNome = item.nome;
-        let acaoValorFormatado = retornarAcaoValorFormatado();
+
+        // let erro = '';
+        // so consegui setar true no item.erro
+        // quando eu vou pra outro campo ele sobrescreve todos, ai fica sempre SÓ 1 TRUE
+        // if(erro.contains(item.index)) {
+        //     item.erro = indexoi.value === item.index;
+        // }
 
         return (
             <View>
@@ -128,7 +165,7 @@ const DadosInvestimentosPage = (props) => {
                 <View style={styles.container}>
                     <View style={{ flexDirection: 'row' }}>
                         <Text style={{ fontSize: 17, textAlign: 'left', flex: 1, fontWeight: 'bold' }}> {SALDO_ACUMULADO_STRING} </Text>
-                        <Text style={{ fontSize: 17, textAlign: 'right', flex: 1 }}> {acaoValorFormatado} </Text>
+                        <Text style={{ fontSize: 17, textAlign: 'right', flex: 1 }}> {utils.formatarMoedaRealComCifrao(item.acaoValorFormatado)} </Text>
                     </View>
                 </View>
 
@@ -138,7 +175,7 @@ const DadosInvestimentosPage = (props) => {
                     </View>
 
                     <CardForm item={item}></CardForm>
-
+                    {item.erro ? erroValorMaior : null}
                 </View>
                 <View style={{ backgroundColor: '#f2f2f2', marginBottom: 15 }}></View>
             </View>
