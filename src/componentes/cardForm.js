@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet, TextInput } from 'react-native';
 
 const CardForm = (props) => {
-    const { value, accessibilityLabel, onPress, index } = props.item;
+    const { acaoValorFormatado, accessibilityLabel, onPress, index } = props.item;
 
     const styles = StyleSheet.create({
         container: {
@@ -19,7 +19,7 @@ const CardForm = (props) => {
         <View style={styles.container}>
             <TextInput
                 style={{ fontSize: 17, textAlign: 'left', flex: 1 }}
-                onChangeText={(value) => onPress(value, index)}
+                onChangeText={(value) => onPress(value, index, acaoValorFormatado)}
                 accessibilityLabel={accessibilityLabel}
                 keyboardType="numeric"
             />
