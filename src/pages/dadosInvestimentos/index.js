@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, FlatList, Text, Modal, StyleSheet, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
+import { View, FlatList, Text, Modal, ImageBackground, StyleSheet, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
 import Cabecalho from '../../componentes/cabecalho';
 import { useNavigation } from '@react-navigation/native';
 import CardApresentacao from '../../componentes/cardApresentacao';
@@ -15,10 +15,13 @@ import {
     ERRO_VALOR_MAIOR,
     MSG_SUCESSO_RESGATE,
     MSG_RESGATE_EFETUADO,
+    MSG_ERRO_RESGATE,
+    MSG_DADOS_INVALIDOS,
     COR_AZUL,
     COR_BRANCO,
     COR_AMARELO,
     BTN_NOVO_RESGATE,
+    BTN_CORRIGIR,
     BTN_CONFIRMAR_RESGATE
 } from '../../utils/constantes';
 import Utils from '../../utils/utils';
@@ -83,10 +86,11 @@ const DadosInvestimentosPage = (props) => {
         centeredView: {
             flex: 1,
             justifyContent: "center",
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
         },
         modalView: {
             margin: 20,
-            backgroundColor: "white",   
+            backgroundColor: "white",
             alignItems: "center",
             shadowColor: "#000",
             shadowOpacity: 0.25,
@@ -97,7 +101,7 @@ const DadosInvestimentosPage = (props) => {
             color: COR_AZUL,
             fontWeight: "bold",
             textAlign: "center",
-            fontSize:20
+            fontSize: 20
         },
     });
 
@@ -190,6 +194,7 @@ const DadosInvestimentosPage = (props) => {
 
     const abrirModalConfirmacao = () => {
         setModalSucessoVisivel(true)
+        // setModalErroVisivel(true);
     }
 
     const renderItem = ({ item }) => {
@@ -236,7 +241,12 @@ const DadosInvestimentosPage = (props) => {
         );
     };
 
+    var modalBackgroundStyle = {
+        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+    };
+
     return (
+
         <SafeAreaView>
 
             <View style={styles.square} />
@@ -252,6 +262,24 @@ const DadosInvestimentosPage = (props) => {
                         <TouchableWithoutFeedback onPress={voltarHome}>
                             <View style={styles.btnNovoResgate}>
                                 <Text style={styles.textStyle}>{BTN_NOVO_RESGATE}</Text>
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </View>
+                </View>
+            </Modal>
+
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalErroVisivel}
+                statusBarTranslucent={true} >
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                        <Text style={styles.tituloModal}>{MSG_DADOS_INVALIDOS}</Text>
+                        <Text style={styles.msgModal}>{MSG_ERRO_RESGATE}</Text>
+                        <TouchableWithoutFeedback onPress={() => { setModalErroVisivel(false) }}>
+                            <View style={styles.btnNovoResgate}>
+                                <Text style={styles.textStyle}>{BTN_CORRIGIR}</Text>
                             </View>
                         </TouchableWithoutFeedback>
                     </View>
