@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, FlatList, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, FlatList, Text, Modal, StyleSheet, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
 import Cabecalho from '../../componentes/cabecalho';
+import { useNavigation } from '@react-navigation/native';
 import CardApresentacao from '../../componentes/cardApresentacao';
 import CardForm from '../../componentes/cardForm';
 import {
@@ -11,22 +12,35 @@ import {
     NOME_STRING,
     SALDO_TOTAL_DISPONIVEL_STRING,
     VALOR_RESGATAR,
-    ERRO_VALOR_MAIOR
+    ERRO_VALOR_MAIOR,
+    MSG_SUCESSO_RESGATE,
+    MSG_RESGATE_EFETUADO,
+    COR_AZUL,
+    COR_BRANCO,
+    COR_AMARELO,
+    BTN_NOVO_RESGATE,
+    BTN_CONFIRMAR_RESGATE
 } from '../../utils/constantes';
 import Utils from '../../utils/utils';
 import Big from 'big.js';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScrollView } from 'react-native-gesture-handler';
 
+
 const DadosInvestimentosPage = (props) => {
 
     const [valores, setValores] = useState([]);
     const [erro, setErro] = useState([]);
+    console.log()
     const [loading, setLoading] = useState(false);
+    const [modalErroVisivel, setModalErroVisivel] = useState(false);
+    const [modalSucessoVisivel, setModalSucessoVisivel] = useState(false);
+
+    const navigation = useNavigation();
 
     const styles = StyleSheet.create({
         container: {
-            backgroundColor: '#fff',
+            backgroundColor: COR_BRANCO,
             alignItems: 'center',
             justifyContent: 'center',
             padding: 8,
@@ -36,24 +50,60 @@ const DadosInvestimentosPage = (props) => {
             position: 'absolute',
             width: '100%',
             height: 3,
-            backgroundColor: "yellow"
+            backgroundColor: COR_AMARELO
         },
         inputContainer: {
             alignItems: 'center',
-            backgroundColor: 'yellow',
+            backgroundColor: COR_AMARELO,
             padding: 15
         },
         saveButtonText: {
             fontSize: 19,
-            color: '#3d80f4'
-        }
+            color: COR_AZUL
+        },
+        tituloModal: {
+            fontSize: 27,
+            textAlign: 'center',
+            color: COR_AZUL,
+            marginTop: 15
+        },
+        msgModal: {
+            fontSize: 14,
+            textAlign: 'left',
+            color: COR_AZUL,
+            marginTop: 10
+        },
+        btnNovoResgate: {
+            backgroundColor: COR_AMARELO,
+            width: '100%',
+            padding: 10,
+            alignItems: 'center',
+            marginTop: 30,
+        },
+        centeredView: {
+            flex: 1,
+            justifyContent: "center",
+        },
+        modalView: {
+            margin: 20,
+            backgroundColor: "white",   
+            alignItems: "center",
+            shadowColor: "#000",
+            shadowOpacity: 0.25,
+            shadowRadius: 4,
+            elevation: 5
+        },
+        textStyle: {
+            color: COR_AZUL,
+            fontWeight: "bold",
+            textAlign: "center",
+            fontSize:20
+        },
     });
 
     let utils = new Utils();
 
     const data = props.route.params.item;
-
-
 
     const handleInput = (value, index, acaoValorFormatado) => {
         setLoading(true)
@@ -72,7 +122,7 @@ const DadosInvestimentosPage = (props) => {
                 const verifyDiffIndex = erro.filter((item) => item !== index);
                 const erros = [
                     ...verifyDiffIndex,
-                    {value: index}
+                    { value: index }
                 ]
 
                 console.log("increment")
@@ -80,15 +130,12 @@ const DadosInvestimentosPage = (props) => {
                 return;
             }
 
-
             if (erro.filter((item) => item.value === index).length > 0) {
                 const a = erro.filter((item) => item.value !== index);
                 console.log("decremetn")
                 setErro(a);
             }
 
-
-            
             setValores(obj);
         } else if (valores.length > 0) {
             const obj = [
@@ -108,6 +155,9 @@ const DadosInvestimentosPage = (props) => {
             valorTotalInicial = Number(valorTotalInicial) + Number(item.value);
         })
         return valorTotalInicial;
+    }
+    const voltarHome = () => {
+        navigation.navigate('Home')
     }
 
     const getDataActions = () => {
@@ -136,6 +186,10 @@ const DadosInvestimentosPage = (props) => {
         let bigPercentual = new Big(item.percentual);
         let bigAcaoValor = new Big(bigSaldoTotal.times(bigPercentual.div(100))).toFixed(2);
         return (Number(bigAcaoValor));
+    }
+
+    const abrirModalConfirmacao = () => {
+        setModalSucessoVisivel(true)
     }
 
     const renderItem = ({ item }) => {
@@ -171,7 +225,7 @@ const DadosInvestimentosPage = (props) => {
 
                 <View style={styles.container}>
                     <View style={{ flexDirection: 'row' }}>
-                        <Text style={{ fontSize: 13, textAlign: 'left', flex: 1, color: '#3d80f4' }}> {VALOR_RESGATAR} </Text>
+                        <Text style={{ fontSize: 13, textAlign: 'left', flex: 1, color: COR_AZUL }}> {VALOR_RESGATAR} </Text>
                     </View>
 
                     <CardForm item={item}></CardForm>
@@ -184,7 +238,26 @@ const DadosInvestimentosPage = (props) => {
 
     return (
         <SafeAreaView>
+
             <View style={styles.square} />
+
+            <Modal
+                animationType="slide"
+                transparent={false}
+                visible={modalSucessoVisivel}>
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                        <Text style={styles.tituloModal}>{MSG_RESGATE_EFETUADO}</Text>
+                        <Text style={styles.msgModal}>{MSG_SUCESSO_RESGATE}</Text>
+                        <TouchableWithoutFeedback onPress={voltarHome}>
+                            <View style={styles.btnNovoResgate}>
+                                <Text style={styles.textStyle}>{BTN_NOVO_RESGATE}</Text>
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </View>
+                </View>
+            </Modal>
+
             <ScrollView>
                 <Cabecalho item={DADOS_DO_INVESTIMENTO_STRING}> </Cabecalho>
 
@@ -198,8 +271,8 @@ const DadosInvestimentosPage = (props) => {
                 <CardApresentacao item={["Valor total a resgatar", utils.formatarMoedaRealComCifrao(getTotal())]}></CardApresentacao>
 
                 <View style={styles.inputContainer}>
-                    <TouchableOpacity style={styles.saveButton}>
-                        <Text style={styles.saveButtonText}>Confirmar Resgate</Text>
+                    <TouchableOpacity onPress={abrirModalConfirmacao}>
+                        <Text style={styles.saveButtonText}>{BTN_CONFIRMAR_RESGATE}</Text>
                     </TouchableOpacity>
                 </View>
             </ScrollView>
