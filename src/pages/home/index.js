@@ -16,7 +16,6 @@ const HomePage = () => {
 
   const Card = ({item, onPress}) => {
     let indicadorCarencia = item.indicadorCarencia.toUpperCase() === 'S';
-
     return (
       <TouchableOpacity
         style={styles.item}

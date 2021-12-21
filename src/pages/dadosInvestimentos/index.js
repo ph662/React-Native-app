@@ -1,17 +1,16 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   FlatList,
   Text,
   Modal,
-  ImageBackground,
   StyleSheet,
   TouchableOpacity,
   TouchableWithoutFeedback,
 } from 'react-native';
 import Cabecalho from '../../componentes/cabecalho';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import CardApresentacao from '../../componentes/cardApresentacao';
 import CardForm from '../../componentes/cardForm';
 import {
@@ -40,23 +39,24 @@ import {
   onChangeInputMoney,
 } from '../../utils/utils';
 import Big from 'big.js';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {ScrollView} from 'react-native-gesture-handler';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { ScrollView } from 'react-native-gesture-handler';
 
 const DadosInvestimentosPage = props => {
   const data = props.route.params.item;
   const [valores, setValores] = useState([
-    {value: 0.0, index: 0},
-    {value: 0.0, index: 1},
-    {value: 0.0, index: 2},
-    {value: 0.0, index: 3},
-    {value: 0.0, index: 4},
+    { value: 0.0, index: 0 },
+    { value: 0.0, index: 1 },
+    { value: 0.0, index: 2 },
+    { value: 0.0, index: 3 },
+    { value: 0.0, index: 4 },
   ]);
 
   const [modalErroVisivel, setModalErroVisivel] = useState(false);
   const [modalSucessoVisivel, setModalSucessoVisivel] = useState(false);
   const [actions, setActions] = useState([]);
-  const [erros, setErros] = useState([]);
+  const [erroResgate, setErroResgate] = useState([]);
+  let erros = [];
 
   useEffect(() => {
     dataActionsFormatter();
@@ -168,7 +168,6 @@ const DadosInvestimentosPage = props => {
         percentual: item.percentual,
         onPress: handleInput,
         accessibilityLabel: 'Informe valor de resgate',
-        erro: false,
       };
       actions.push(obj);
     });
@@ -190,23 +189,29 @@ const DadosInvestimentosPage = props => {
   };
 
   const abrirModalConfirmacao = () => {
-    console.log(erros)
+    setErroResgate(erros);
+    if (erros.length > 0) {
+      setModalSucessoVisivel(false);
+      setModalErroVisivel(true);
+      return;
+    }
+    setModalErroVisivel(false);
     setModalSucessoVisivel(true);
   };
 
-  const renderItem = ({item}) => {
+  const renderItem = ({ item }) => {
     if (item.value > retornarAcaoValorFormatado(item)) {
       const erro = erros.filter(itemA => itemA !== item);
       const obj = [...erro, item];
-      setErros(obj);
+      erros = obj;
     } else {
       const erro = erros.filter(itemA => itemA !== item);
-      setErros(erro);
+      erros = erro;
     }
 
     let erroValorMaior = (
-      <View style={{flexDirection: 'row'}}>
-        <Text style={{fontSize: 13, textAlign: 'left', flex: 1, color: 'red'}}>
+      <View style={{ flexDirection: 'row' }}>
+        <Text style={{ fontSize: 13, textAlign: 'left', flex: 1, color: 'red' }}>
           {' '}
           {`${ERRO_VALOR_MAIOR} ${formatarMoedaRealComCifrao(
             item.acaoValorFormatado,
@@ -220,7 +225,7 @@ const DadosInvestimentosPage = props => {
     return (
       <View>
         <View style={styles.container}>
-          <View style={{flexDirection: 'row'}}>
+          <View style={{ flexDirection: 'row' }}>
             <Text
               style={{
                 fontSize: 17,
@@ -233,7 +238,7 @@ const DadosInvestimentosPage = props => {
             </Text>
             <Text
               numberOfLines={1}
-              style={{fontSize: 17, textAlign: 'right', flex: 1}}>
+              style={{ fontSize: 17, textAlign: 'right', flex: 1 }}>
               {' '}
               {acaoNome}{' '}
             </Text>
@@ -241,7 +246,7 @@ const DadosInvestimentosPage = props => {
         </View>
 
         <View style={styles.container}>
-          <View style={{flexDirection: 'row'}}>
+          <View style={{ flexDirection: 'row' }}>
             <Text
               style={{
                 fontSize: 17,
@@ -252,7 +257,7 @@ const DadosInvestimentosPage = props => {
               {' '}
               {SALDO_ACUMULADO_STRING}{' '}
             </Text>
-            <Text style={{fontSize: 17, textAlign: 'right', flex: 1}}>
+            <Text style={{ fontSize: 17, textAlign: 'right', flex: 1 }}>
               {' '}
               {formatarMoedaRealComCifrao(item.acaoValorFormatado)}{' '}
             </Text>
@@ -260,7 +265,7 @@ const DadosInvestimentosPage = props => {
         </View>
 
         <View style={styles.container}>
-          <View style={{flexDirection: 'row'}}>
+          <View style={{ flexDirection: 'row' }}>
             <Text
               style={{
                 fontSize: 13,
@@ -275,10 +280,10 @@ const DadosInvestimentosPage = props => {
 
           <CardForm item={item} />
           {item.value > retornarAcaoValorFormatado(item)
-            ? erroValorMaior(item)
+            ? erroValorMaior
             : null}
         </View>
-        <View style={{backgroundColor: '#f2f2f2', marginBottom: 15}} />
+        <View style={{ backgroundColor: '#f2f2f2', marginBottom: 15 }} />
       </View>
     );
   };
@@ -313,6 +318,12 @@ const DadosInvestimentosPage = props => {
           <View style={styles.modalView}>
             <Text style={styles.tituloModal}>{MSG_DADOS_INVALIDOS}</Text>
             <Text style={styles.msgModal}>{MSG_ERRO_RESGATE}</Text>
+            {
+              erroResgate.map((item) => (
+                <Text style={styles.msgModal}>{`${item.nome}: ${formatarMoedaRealComCifrao(item.acaoValorFormatado)}`}</Text>
+              )
+              )
+            }
             <TouchableWithoutFeedback
               onPress={() => {
                 setModalErroVisivel(false);
